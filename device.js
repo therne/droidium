@@ -12,7 +12,7 @@ const shell = require('shelljs');
  * @returns {String} command result (output)
  */
 function adb(command) {
-    return shell.exec('adb ' + command, {silent: true}).output;
+    return shell.exec(`adb ${command}`, {silent: true}).output;
 }
 
 class Device {
@@ -21,6 +21,7 @@ class Device {
     }
 
     command(command) {
+        if (this.deviceId) command = `-s ${this.deviceId} ${command}`;
         return adb(command);
     }
 
@@ -34,10 +35,12 @@ class Device {
 
         if (connections.length == 0) {
             throw new Error("Device is not connected. Please connect to the device.");
-        }
 
-        // TODO : chose connection
-        return new Device();
+        } else if (connections.length > 1) {
+            // TODO : should be able to choose connection
+        }
+        const device = new Device();
+        return device;
     }
 }
 
