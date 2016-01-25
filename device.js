@@ -5,6 +5,8 @@
 'use strict';
 
 const shell = require('shelljs');
+const mkdirp = require('mkdirp');
+const path = require('path');
 
 /**
  * Executes adb command and returns the result.
@@ -17,7 +19,7 @@ function adb(command) {
 
 class Device {
     shell(command) {
-        return this.adb('shell ' + command);
+        return this.command('shell ' + command);
     }
 
     command(command) {
@@ -25,13 +27,30 @@ class Device {
         return adb(command);
     }
 
+    /**
+     * Take a screenshot of the device.
+     * @param outputFile {String} output file path.
+     */
+    screenShot(outputFile) {
+        mkdirp.sync(path.resolve(outputFile, '..'));
+        this.shell('screencap -p /sdcard/screen.png');
+        this.command(`pull /sdcard/screen.png ${outputFile}`);
+    }
+
     static connect() {
+        // DDMS hack - check http://d.android.com/tools/performance/hierarchy-viewer/setup.html
+        env['ANDROID_HVPROTO'] = 'ddm';
+
         // check it's connected
         adb('start-server');
         let connections = adb('devices')
                 .split('\n')
                 .filter(line => line.length > 1)
-                .slice(1);
+                .slice(1) // delete "List of devices attached" line
+                .map(line => {
+                    const matched = /(\w+)\s+(\w+)/.exec(line);
+                    return { id: matched[1], type: matched[2] };
+                });
 
         if (connections.length == 0) {
             throw new Error("Device is not connected. Please connect to the device.");
