@@ -1,0 +1,122 @@
+'use strict';
+
+/**
+ * ViewServer
+ * Dumps view hierarchy from Android devices.
+ */
+const net = require('net');
+const PORT = 14949;
+const ViewNode = require('./view-node');
+
+class ViewServer {
+    constructor(device) {
+        this.device = device;
+    }
+
+    /**
+     * Dump the window's view hierarchy.
+     * @param [windowId] {String} (currently focused window ID if not given.)
+     * @param [callback]
+     */
+    dump(windowId, callback) {
+        if (windowId instanceof Function || !windowId) {
+            callback = windowId;
+            windowId = this.getFocusedWindowId();
+        }
+        if (!callback) return (cb) => this.dump(windowId, cb); // to support yield (async-await pattern)
+
+        // dump command
+        this.send('DUMP ' + windowId, parse);
+
+        function parse(err, data) {
+            if (err) return callback(err, null);
+
+            let lines = data.split('\n');
+            let rootNode = new ViewNode('Root');
+            let nodeStack = [rootNode], lastIndent = 0;
+
+            for (let line of lines) {
+                let node = ViewNode.fromDump(line);
+                let indent = getIndentation(line);
+
+                if (indent > lastIndent) {
+                    nodeStack[nodeStack.length - 1].addChild(node);
+                    nodeStack.push(node);
+                    lastIndent++;
+
+                } else if (indent < lastIndent) {
+                    while (indent <= lastIndent) {
+                        nodeStack.pop();
+                        lastIndent--;
+                    }
+                    nodeStack[nodeStack.length - 1].addChild(node);
+                    nodeStack.push(node);
+                    lastIndent++;
+
+                } else if (indent != 0) {
+                    // replace node
+                    nodeStack.pop();
+                    nodeStack[nodeStack.length - 1].addChild(node);
+                    nodeStack.push(node);
+                }
+                else nodeStack[nodeStack.length - 1].addChild(node);
+            }
+            callback(null, rootNode);
+        }
+    }
+
+    getProtocolVersion(callback) {
+        if (!callback) return (cb) => this.getProtocolVersion(cb); // to support yield (async-await pattern)
+
+        this.send('PROTOCOL', (err, data) => {
+            if (data) callback(err, parseInt(data));
+            else callback(err, data);
+        });
+    }
+
+    send(command, callback) {
+        if (!this.isConnected()) this.connect();
+        var result = '';
+
+        // start socket
+        const client = new net.Socket();
+        client.on('data', (data) => result += data)
+            .on('error', (err) => callback(err, null))
+            .on('close', () => {
+                if (result.endsWith('DONE.\nDONE\n')) result = result.replace(/DONE.\nDONE\n/g, '');
+                if (result.endsWith('\n')) result = result.substring(0, result.length - 1);
+
+                callback(null, result)
+            });
+
+        client.connect(PORT, '127.0.0.1', () => client.write(command + '\n'));
+    }
+
+    getFocusedWindowId() {
+        let windowInfo = this.device.shell('dumpsys window windows');
+        return /mCurrentFocus\=Window\{([\w\d]+)/g.exec(windowInfo)[1];
+    }
+
+    isConnected() {
+        return this.device.shell('service call window 3').indexOf('00000001') != -1;
+    }
+
+    connect() {
+        // kill ViewServer
+        this.device.shell('service call window 2');
+
+        // launch ViewServer and forward port to localhost:4939
+        this.device.shell('service call window 1 i32 4939');
+        this.device.command('forward tcp:'+PORT+' tcp:4939');
+    }
+}
+
+function getIndentation(line) {
+    let indentCount = 0;
+    for (let c of line) {
+        if (c != ' ') return indentCount;
+        else indentCount++;
+    }
+}
+
+module.exports = ViewServer;
