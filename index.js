@@ -6,4 +6,4 @@
 const co = require('co');
 const fs = require('fs');
 
-co(require('./app')).catch(function*(err) { console.error(err.message) });
+co(require('./app')).catch(function(err) { console.error(err.stack) });

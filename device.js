@@ -7,6 +7,7 @@
 const shell = require('shelljs');
 const mkdirp = require('mkdirp');
 const path = require('path');
+const Keyboard = require('./Keyboard');
 
 /**
  * Executes adb command and returns the result.
@@ -18,8 +19,30 @@ function adb(command) {
 }
 
 class Device {
+    constructor(deviceId) {
+        this.deviceId = deviceId;
+        this.keyboard = new Keyboard(this);
+
+        // do setup
+        this.setup();
+    }
+
+    /**
+     * Setup the device - Installing debug tools, etc..
+     */
+    setup() {
+        // setup has ran before?
+        const result = this.shell('cat /sdcard/.droinium');
+        if (!result.includes('No such file or directory')) return;
+
+        // initialize components
+        this.keyboard.setup();
+
+        this.shell('touch /sdcard/.droinium')
+    }
+
     shell(command) {
-        return this.command('shell ' + command);
+        return this.command(`shell '${command}'`);
     }
 
     command(command) {
@@ -34,7 +57,7 @@ class Device {
     screenShot(outputFile) {
         mkdirp.sync(path.resolve(outputFile, '..'));
         this.shell('screencap -p /sdcard/screen.png');
-        this.command(`pull /sdcard/screen.png ${outputFile}`);
+        this.command(`pull /sdcard/screen.png '${outputFile}'`);
     }
 
     static connect() {
@@ -58,8 +81,7 @@ class Device {
         } else if (connections.length > 1) {
             // TODO : should be able to choose connection
         }
-        const device = new Device();
-        return device;
+        return new Device();
     }
 }
 

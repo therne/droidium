@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "co": "^4.6.0",
+    "mkdirp": "^0.5.1",
     "shelljs": "^0.5.3"
   }
 }

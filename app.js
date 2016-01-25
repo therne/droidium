@@ -10,6 +10,7 @@ module.exports = function*() {
     let device = Device.connect();
     let vs = new ViewServer(device);
 
+    device.screenShot(__dirname + '/screen.png');
     let node = yield vs.dump();
     console.log(node);
 };
