@@ -2,7 +2,7 @@
   "name": "droinium",
   "version": "1.0.0",
   "description": "Droinium is an automation framework for Android.",
-  "main": "app.js",
+  "main": "src",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "co": "^4.6.0",
+    "co-request": "^1.0.0",
     "mkdirp": "^0.5.1",
     "shelljs": "^0.5.3"
   }
