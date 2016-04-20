@@ -6,7 +6,7 @@
  */
 const net = require('net');
 const PORT = 14949;
-const ViewNode = require('./view-node');
+const ViewNode = require('./ViewNode');
 
 class ViewServer {
     constructor(device) {
@@ -75,7 +75,9 @@ class ViewServer {
     }
 
     send(command, callback) {
-        if (!this.isConnected()) this.connect();
+        if (!this.isConnected()) {
+            this.connect();
+        }
         var result = '';
 
         // start socket
@@ -85,6 +87,10 @@ class ViewServer {
             .on('close', () => {
                 if (result.endsWith('DONE.\nDONE\n')) result = result.replace(/DONE.\nDONE\n/g, '');
                 if (result.endsWith('\n')) result = result.substring(0, result.length - 1);
+                if (!result) {
+                    console.error('ViewServer Connection failed!');
+                    return;
+                }
 
                 callback(null, result)
             });
@@ -98,7 +104,8 @@ class ViewServer {
     }
 
     isConnected() {
-        return this.device.shell('service call window 3').indexOf('00000001') != -1;
+        return this.device.shell('service call window 3').includes('00000001')
+            && this.device.command('forward --list').includes(`${PORT}`);
     }
 
     connect() {

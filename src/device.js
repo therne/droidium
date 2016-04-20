@@ -7,7 +7,7 @@
 const shell = require('shelljs');
 const mkdirp = require('mkdirp');
 const path = require('path');
-const Keyboard = require('./Keyboard');
+const Keyboard = require('./inputs/Keyboard');
 
 /**
  * Executes adb command and returns the result.
@@ -22,23 +22,6 @@ class Device {
     constructor(deviceId) {
         this.deviceId = deviceId;
         this.keyboard = new Keyboard(this);
-
-        // do setup
-        this.setup();
-    }
-
-    /**
-     * Setup the device - Installing debug tools, etc..
-     */
-    setup() {
-        // setup has ran before?
-        const result = this.shell('cat /sdcard/.droinium');
-        if (!result.includes('No such file or directory')) return;
-
-        // initialize components
-        this.keyboard.setup();
-
-        this.shell('touch /sdcard/.droinium')
     }
 
     shell(command) {
@@ -62,7 +45,7 @@ class Device {
 
     static connect() {
         // DDMS hack - check http://d.android.com/tools/performance/hierarchy-viewer/setup.html
-        env['ANDROID_HVPROTO'] = 'ddm';
+        shell.env['ANDROID_HVPROTO'] = 'ddm';
 
         // check it's connected
         adb('start-server');
