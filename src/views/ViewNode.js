@@ -27,8 +27,6 @@ class ViewNode {
         let node = new ViewNode(classNamePart.slice(0, atSignIndex),
                                 classNamePart.slice(atSignIndex + 1));
 
-        console.log(`CP: ${classNamePart}, VP: ${propPart}`);
-
         let index = 0;
         while (index < propPart.length) {
             // property parsing
@@ -106,8 +104,6 @@ class ViewNode {
                     ? '#' + (Number(group['Text']['mCurTextColor']) >>> 0).toString(16)
                     : '#00000000')
         };
-
-        console.log(node.props.textColor);
 
         /**
          * NOTE:

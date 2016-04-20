@@ -5,6 +5,7 @@
 'use strict';
 
 const request = require('co-request');
+const debug = require('debug')('droinium:rpc-client');
 
 class RpcClient {
     /**
@@ -23,13 +24,15 @@ class RpcClient {
     *call(method, params) {
         let payload = {
             jsonrpc: '2.0',
-            id: `${method} at ${Date.now()}`,
+            id: new Buffer(method + ' ' + Date.now()).toString('base64'),
             method,
             params
         };
 
-        let response = request.post(this.url, { json: payload });
+        debug(`Request => ${JSON.stringify(payload, null, 2)}`);
+        let response = yield request.post(this.url, { json: payload });
         let result = response.body;
+        debug(`Response => ${JSON.stringify(result, null, 2)}`);
 
         if (result.error) {
             const errorName = result.error.data.exceptionTypeName;

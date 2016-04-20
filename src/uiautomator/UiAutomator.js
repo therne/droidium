@@ -5,6 +5,7 @@
 'use strict';
 
 const path = require('path');
+const debug = require('debug')('droinium:uiautomator');
 const UiObject = require('./UiObject');
 const Selector = require('./Selector');
 const RpcClient = require('./RpcClient');
@@ -27,11 +28,13 @@ class UiAutomator {
     setup() {
         const device = this.device;
         if (!this.isInstalled()) {
+            debug('Server is not installed. Installing...');
             device.command(`install ${apksDir}/app-uiautomator.apk`);
             device.command(`install ${apksDir}/app-uiautomator-test.apk`);
         }
 
         if (!this.isForwarded()) {
+            debug(`Fowarding port... (device:${serverPort} -> local:${this.port})`);
             device.command(`forward tcp:${this.port} tcp:${serverPort}`);
         }
 
@@ -54,7 +57,7 @@ class UiAutomator {
      * @returns {UiObject}
      */
     find(query) {
-        return new UiObject(new Selector(query));
+        return new UiObject(this, new Selector(query));
     }
 
     /**

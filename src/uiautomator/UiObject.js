@@ -46,6 +46,23 @@ class UiObject {
     }
 
     /**
+     * Get matched objects count.
+     */
+    *getCount() {
+        return yield this.rpc.call('count', [this.selector]);
+    }
+
+    /**
+     * @returns {UiObject} nth-element of matched objects.
+     */
+    at(index) {
+        if (typeof index !== 'number' || index < 0) throw Error('index must be at least 0');
+        const selector = this.selector.clone();
+        selector.set('instance', index);
+        return new UiObject(this.uiAutomator, selector);
+    }
+
+    /**
      * Get object's full information. Uses ViewServer.
      * NOTE: This may take a while.
      */
@@ -71,7 +88,7 @@ class UiObject {
      *                        (default is center click)
      */
     *click(action) {
-        yield this.rpc.call('click', [this.selector, action]);
+        yield this.rpc.call('click', action ? [this.selector, action] : [this.selector]);
     }
 
     /**
@@ -151,7 +168,7 @@ class UiObject {
      * @param direction [String] horizontal | vertical
      */
     *flingForward(direction) {
-        direction = direction || 'vertical';
+        direction = (direction || 'vertical') == 'vertical';
         yield this.__fling(direction, 'Forward');
     }
 
@@ -160,7 +177,7 @@ class UiObject {
      * @param direction [String] horizontal | vertical
      */
     *flingBackward(direction) {
-        direction = direction || 'vertical';
+        direction = (direction || 'vertical') == 'vertical';
         yield this.__fling(direction, 'Backward');
     }
 
@@ -170,7 +187,7 @@ class UiObject {
      * @param maxSwipes [Number] (Optional) default is 1000
      */
     *flingToBeginning(direction, maxSwipes) {
-        direction = direction || 'vertical';
+        direction = (direction || 'vertical') == 'vertical';
         maxSwipes = maxSwipes || 1000;
         yield this.__fling(direction, 'ToBeginning', maxSwipes);
     }
@@ -181,7 +198,7 @@ class UiObject {
      * @param maxSwipes [Number] (Optional) default is 1000
      */
     *flingToEnd(direction, maxSwipes) {
-        direction = direction || 'vertical';
+        direction = (direction || 'vertical') == 'vertical';
         maxSwipes = maxSwipes || 1000;
         yield this.__fling(direction, 'ToEnd', maxSwipes);
     }
@@ -195,53 +212,61 @@ class UiObject {
         if (action.startsWith('To')) param.push(maxSwipes);
         param.push(steps);
 
-        yield this.rpc.call(`scroll${action}`, param);
+        return yield this.rpc.call(`scroll${action}`, param);
     }
 
     /**
      * Perform scroll forward action.
+     *
      * @param direction [String] horizontal | vertical
      * @param steps [Number] (Optional) default is 100px
+     * @returns true if it's able to scroll more
      */
     *scrollForward(direction, steps) {
-        direction = direction || 'vertical';
-        yield this.__scroll(direction, 'Forward', steps);
+        direction = (direction || 'vertical') == 'vertical';
+        return yield this.__scroll(direction, 'Forward', steps);
     }
 
     /**
      * Perform scroll backward action.
+     *
      * @param direction [String] horizontal | vertical
      * @param steps [Number] (Optional) default is 100px
+     * @returns true if it's able to scroll more
      */
     *scrollBackward(direction, steps) {
-        direction = direction || 'vertical';
-        yield this.__scroll(direction, 'Backward', steps);
+        direction = (direction || 'vertical') == 'vertical';
+        return yield this.__scroll(direction, 'Backward', steps);
     }
 
     /**
      * Perform scroll to the begin of scroll.
+     *
      * @param direction [String] horizontal | vertical.
      * @param steps [Number] (Optional) default is 100px
      * @param maxSwipes [Number] (Optional) default is 1000
+     * @returns true if it's able to scroll more
      */
     *scrollToBeginning(direction, steps, maxSwipes) {
-        direction = direction || 'vertical';
+        direction = (direction || 'vertical') == 'vertical';
         maxSwipes = maxSwipes || 1000;
         steps = steps || 100;
-        yield this.__fling(direction, 'ToBeginning', steps, maxSwipes);
+        return yield this.__fling(direction, 'ToBeginning', steps, maxSwipes);
     }
 
     /**
      * Perform scroll to the begin of scroll.
+     *
      * @param direction [String] horizontal | vertical.
      * @param steps [Number] (Optional) default is 100px
      * @param maxSwipes [Number] (Optional) default is 1000
+     * @returns true if it's able to scroll more
      */
     *scrollToEnd(direction, steps, maxSwipes) {
-        direction = direction || 'vertical';
+        direction = (direction || 'vertical') == 'vertical';
         maxSwipes = maxSwipes || 1000;
         steps = steps || 100;
-        yield this.__fling(direction, 'ToEnd', steps, maxSwipes);
+        return yield this.__fling(direction, 'ToEnd', steps, maxSwipes);
     }
 }
 

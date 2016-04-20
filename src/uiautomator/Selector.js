@@ -40,14 +40,14 @@ class Selector {
 
         if (!query) return;
         for (const key in query) {
-            if (fields.hasOwnProperty(key)) throw Error(`query ${key} is not allowed.`);
+            if (!fields.hasOwnProperty(key)) throw Error(`query ${key} is not allowed.`);
             this.set(key, query[key]);
         }
     }
 
-    set(key) {
+    set(key, value) {
         if (!(key in fields)) return;
-        this[key] = selector[key]; // value
+        this[key] = value;
         this.mask |= fields[key];
     }
 
@@ -69,6 +69,12 @@ class Selector {
 
     clone() {
         const clone = new Selector();
+
+        // copy all properties
+        for (const key in this) {
+            if (['mask', 'childOrSibling', 'childOrSiblingSelector'].indexOf(key) != -1) continue;
+            clone[key] = this[key];
+        }
         clone.mask = this.mask;
         clone.childOrSibling = this.childOrSibling.concat();
         clone.childOrSiblingSelector = this.childOrSiblingSelector.concat();

@@ -5,8 +5,10 @@
  * Dumps view hierarchy from Android devices.
  */
 const net = require('net');
-const PORT = 14949;
+const debug = require('debug')('droinium:viewserver');
 const ViewNode = require('./ViewNode');
+
+const PORT = 14949;
 
 class ViewServer {
     constructor(device) {
@@ -75,8 +77,8 @@ class ViewServer {
     }
 
     send(command, callback) {
-        if (!this.isConnected()) {
-            this.connect();
+        if (!this.isStarted()) {
+            this.start();
         }
         var result = '';
 
@@ -103,12 +105,14 @@ class ViewServer {
         return /mCurrentFocus\=Window\{([\w\d]+)/g.exec(windowInfo)[1];
     }
 
-    isConnected() {
+    isStarted() {
         return this.device.shell('service call window 3').includes('00000001')
             && this.device.command('forward --list').includes(`${PORT}`);
     }
 
-    connect() {
+    start() {
+        debug('Starting ViewServer...');
+
         // kill ViewServer
         this.device.shell('service call window 2');
 

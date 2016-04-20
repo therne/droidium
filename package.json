@@ -11,6 +11,7 @@
   "dependencies": {
     "co": "^4.6.0",
     "co-request": "^1.0.0",
+    "debug": "^2.2.0",
     "mkdirp": "^0.5.1",
     "shelljs": "^0.5.3"
   }
