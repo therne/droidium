@@ -1,12 +1,12 @@
 {
-  "name": "droinium",
-  "version": "1.0.0",
-  "description": "Droinium is an automation framework for Android.",
+  "name": "droidium",
+  "version": "0.1.0",
+  "description": "Droidium is an automation framework for Android.",
   "main": "lib",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "therne",
   "license": "ISC",
   "dependencies": {
     "co": "^4.6.0",
