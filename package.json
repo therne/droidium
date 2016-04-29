@@ -1,7 +1,7 @@
 {
   "name": "droidium",
   "version": "0.1.0",
-  "description": "Droidium is an automation framework for Android.",
+  "description": "Droidium is an Android manipulation & automation framework for Node.js.",
   "main": "lib",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

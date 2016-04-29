@@ -4,8 +4,8 @@
 'use strict';
 
 const droinium = require('.');
-const ViewServer = require('./view-server');
-const UiAutomator = require('./uiautomator');
+const ViewServer = require('../view-server');
+const UiAutomator = require('../uiautomator');
 
 module.exports = function*() {
     let device = droinium.connect();
