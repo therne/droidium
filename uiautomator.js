@@ -3,4 +3,4 @@
  */
 'use strict';
  
-module.exports = require('./src/uiautomator/UiAutomator');
+module.exports = require('./lib/uiautomator/UiAutomator');

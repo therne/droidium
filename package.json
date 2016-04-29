@@ -2,7 +2,7 @@
   "name": "droinium",
   "version": "1.0.0",
   "description": "Droinium is an automation framework for Android.",
-  "main": "src",
+  "main": "lib",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
