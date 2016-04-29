@@ -4,7 +4,7 @@
 'use strict';
 
 const droinium = require('.');
-const ViewServer = require('./lib/views/ViewServer');
+const ViewServer = require('./view-server');
 const UiAutomator = require('./uiautomator');
 
 module.exports = function*() {
